@@ -8,7 +8,17 @@ from functools import lru_cache
 from urllib import parse
 from urllib.error import URLError
 from urllib.request import Request, urlopen
+from random_user_agent.user_agent import UserAgent
+from random_user_agent.params import SoftwareName, OperatingSystem
 
+
+# you can also import SoftwareEngine, HardwareType, SoftwareType, Popularity from random_user_agent.params
+# you can also set number of user agents required by providing `limit` as parameter
+
+software_names = [SoftwareName.CHROME.value]
+operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]   
+
+user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
 from pytube.exceptions import RegexMatchError, MaxRetriesExceeded
 from pytube.helpers import regex_search
 
@@ -23,7 +33,7 @@ def _execute_request(
     data=None,
     timeout=socket._GLOBAL_DEFAULT_TIMEOUT
 ):
-    base_headers = {"User-Agent": "Mozilla/5.0", "accept-language": "en-US,en"}
+    base_headers = {"User-Agent": user_agent_rotator.get_random_user_agent(), "accept-language": "en-US,en"}
     if headers:
         base_headers.update(headers)
     if data:
