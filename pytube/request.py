@@ -41,7 +41,7 @@ def _execute_request(
     try:
         # The 'requests' library raises exceptions for HTTP errors, so you might want to catch them.
         response = session.request(method=method or 'GET', url=url, headers=headers, json=data, timeout=timeout)
-        if response.status_code == 429:
+        if response.status_code == 429 or response.status_code == 403:
             proxy.changeIp()
         response.raise_for_status()  # Raises stored HTTPError, if one occurred.
         return response
