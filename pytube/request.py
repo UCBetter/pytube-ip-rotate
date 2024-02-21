@@ -24,7 +24,7 @@ def _execute_request(
     method=None,
     headers=None,
     data=None,
-    timeout=socket._GLOBAL_DEFAULT_TIMEOUT
+    timeout=2
 ):
     base_headers = {"User-Agent": "Mozilla/5.0", "accept-language": "en-US,en"}
     if headers:
