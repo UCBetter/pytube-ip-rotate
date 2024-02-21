@@ -9,7 +9,7 @@ from urllib import parse
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 import ip_rotator
-
+import requests
 proxy = ip_rotator.Proxy()  # To access https url set (https = True)
 
 from pytube.exceptions import RegexMatchError, MaxRetriesExceeded
