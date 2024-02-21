@@ -8,9 +8,6 @@ from functools import lru_cache
 from urllib import parse
 from urllib.error import URLError
 from urllib.request import Request, urlopen
-import ip_rotator
-import requests
-proxy = ip_rotator.Proxy()  # To access https url set (https = True)
 
 from pytube.exceptions import RegexMatchError, MaxRetriesExceeded
 from pytube.helpers import regex_search
@@ -24,30 +21,20 @@ def _execute_request(
     method=None,
     headers=None,
     data=None,
-    timeout=2
+    timeout=socket._GLOBAL_DEFAULT_TIMEOUT
 ):
     base_headers = {"User-Agent": "Mozilla/5.0", "accept-language": "en-US,en"}
     if headers:
         base_headers.update(headers)
-    
-    # The requests library automatically encodes the data to JSON,
-    # so you only need to pass the dictionary directly.
-    # However, if you specifically need to send JSON as a string and set the content type,
-    # you would manually encode it as before and set the 'Content-Type' header to 'application/json'.
-    
-    session = proxy.session  # Using a session object for connection pooling and configuration.
-    session.headers.update(base_headers)
-    
-    try:
-        # The 'requests' library raises exceptions for HTTP errors, so you might want to catch them.
-        response = session.request(method=method or 'GET', url=url, headers=headers, json=data, timeout=timeout)
-        if response.status_code == 429 or response.status_code == 403:
-            proxy.changeIp()
-        response.raise_for_status()  # Raises stored HTTPError, if one occurred.
-        return response
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Request failed: {e}")
-        raise  # Re-raise the exception after logging it.
+    if data:
+        # encode data for request
+        if not isinstance(data, bytes):
+            data = bytes(json.dumps(data), encoding="utf-8")
+    if url.lower().startswith("http"):
+        request = Request(url, headers=base_headers, method=method, data=data)
+    else:
+        raise ValueError("Invalid URL")
+    return urlopen(request, timeout=timeout)  # nosec
 
 
 def get(url, extra_headers=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
